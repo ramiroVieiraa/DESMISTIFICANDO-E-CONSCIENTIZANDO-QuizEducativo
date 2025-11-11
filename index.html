@@ -1,719 +1,521 @@
 <!doctype html>
 <html lang="pt-BR">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Desmistificando e Conscientizando - Quiz Educativo</title>
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <style>
-        body {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            height: 100%;
-            overflow-x: hidden;
-        }
-
-        html {
-            height: 100%;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        .game-container {
-            min-height: 100%;
-            background: linear-gradient(135deg, #1a0a2e 0%, #3d1f5c 50%, #8b4513 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .pattern-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.1;
-            background-image: 
-                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,215,0,0.3) 35px, rgba(255,215,0,0.3) 70px),
-                repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,140,0,0.3) 35px, rgba(255,140,0,0.3) 70px);
-            pointer-events: none;
-        }
-
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-            padding: 40px 20px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .screen {
-            display: none;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .start-screen {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .game-logo {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            line-height: 1.2;
-        }
-
-        .game-subtitle {
-            color: #ff8c00;
-            font-size: 24px;
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .decorative-element {
-            width: 100px;
-            height: 100px;
-            margin: 30px auto;
-            position: relative;
-        }
-
-        .decorative-element svg {
-            width: 100%;
-            height: 100%;
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #1a0a2e;
-            border: none;
-            padding: 18px 50px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(255, 215, 0, 0.5);
-        }
-
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .quiz-screen {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .progress-bar {
-            background: rgba(255, 255, 255, 0.1);
-            height: 8px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            background: linear-gradient(90deg, #ffd700, #ff8c00);
-            height: 100%;
-            transition: width 0.5s ease;
-            border-radius: 10px;
-        }
-
-        .question-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .question-number {
-            color: #ff8c00;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .question-text {
-            color: #1a0a2e;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            line-height: 1.4;
-        }
-
-        .answers-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .answer-btn {
-            background: #f5f5f5;
-            border: 3px solid transparent;
-            padding: 20px 25px;
-            font-size: 18px;
-            border-radius: 15px;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.3s ease;
-            color: #1a0a2e;
-            font-weight: 500;
-        }
-
-        .answer-btn:hover:not(:disabled) {
-            background: #e8e8e8;
-            border-color: #ffd700;
-            transform: translateX(5px);
-        }
-
-        .answer-btn.correct {
-            background: #4caf50;
-            color: white;
-            border-color: #2e7d32;
-        }
-
-        .answer-btn.incorrect {
-            background: #f44336;
-            color: white;
-            border-color: #c62828;
-        }
-
-        .answer-btn:disabled {
-            cursor: not-allowed;
-        }
-
-        .feedback-box {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 25px;
-            color: #1a0a2e;
-            font-size: 16px;
-            line-height: 1.6;
-            display: none;
-            animation: slideIn 0.5s ease;
-        }
-
-        .feedback-box.show {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .feedback-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .score-display {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffd700;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-            border: 2px solid #ffd700;
-        }
-
-        .result-screen {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .result-title {
-            color: #ffd700;
-            font-size: 42px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-        }
-
-        .final-score {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #1a0a2e;
-            font-size: 72px;
-            font-weight: bold;
-            padding: 40px;
-            border-radius: 20px;
-            margin: 30px auto;
-            max-width: 400px;
-            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.4);
-        }
-
-        .result-message {
-            color: #ffffff;
-            font-size: 24px;
-            margin: 30px 0;
-            line-height: 1.6;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .result-emoji {
-            font-size: 64px;
-            margin: 20px 0;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 40px;
-        }
-
-        .next-btn {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-            margin-top: 20px;
-        }
-
-        .loading-indicator {
-            display: none;
-            color: #ffd700;
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        .loading-indicator.show {
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            .game-logo {
-                font-size: 32px;
-            }
-
-            .game-subtitle {
-                font-size: 18px;
-            }
-
-            .question-card {
-                padding: 25px;
-            }
-
-            .question-text {
-                font-size: 20px;
-            }
-
-            .answer-btn {
-                font-size: 16px;
-                padding: 15px 20px;
-            }
-
-            .final-score {
-                font-size: 56px;
-                padding: 30px;
-            }
-
-            .result-title {
-                font-size: 32px;
-            }
-
-            .result-message {
-                font-size: 20px;
-            }
-        }
-    </style>
+    /* (mantive seu estilo original, com pequenas adaptações para telas de tema) */
+    body { box-sizing: border-box; margin:0; padding:0; font-family:'Arial',sans-serif; height:100%; overflow-x:hidden; }
+    html { height:100%; }
+    * { box-sizing: border-box; }
+    .game-container { min-height:100%; background: linear-gradient(135deg, #1a0a2e 0%, #3d1f5c 50%, #8b4513 100%); position:relative; overflow:hidden; padding-bottom:40px; }
+    .pattern-overlay { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0.1; background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,215,0,0.3) 35px, rgba(255,215,0,0.3) 70px), repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,140,0,0.3) 35px, rgba(255,140,0,0.3) 70px); pointer-events:none; }
+    .content-wrapper { position:relative; z-index:1; padding:40px 20px; max-width:900px; margin:0 auto; }
+    .screen { display:none; animation: fadeIn 0.45s ease-in; }
+    .screen.active { display:block; }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+    .start-screen { text-align:center; padding:60px 20px; }
+    .game-logo { background: linear-gradient(135deg,#ffd700,#ff8c00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-size:48px; font-weight:bold; margin-bottom:20px; text-transform:uppercase; letter-spacing:2px; line-height:1.2; }
+    .game-subtitle { color:#ff8c00; font-size:24px; margin-bottom:40px; text-transform:uppercase; letter-spacing:1px; }
+    .decorative-element { width:100px; height:100px; margin:30px auto; position:relative; }
+    .decorative-element svg { width:100%; height:100%; animation: rotate 20s linear infinite; }
+    @keyframes rotate { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+    .btn { background: linear-gradient(135deg,#ffd700,#ff8c00); color:#1a0a2e; border:none; padding:18px 50px; font-size:20px; font-weight:bold; border-radius:50px; cursor:pointer; text-transform:uppercase; letter-spacing:1px; transition:all .3s ease; box-shadow:0 8px 20px rgba(255,215,0,0.3); }
+    .btn:hover { transform:translateY(-3px); box-shadow:0 12px 30px rgba(255,215,0,0.5); }
+    .btn:active { transform:translateY(-1px); }
+    .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+    .quiz-screen { max-width:800px; margin:0 auto; }
+    .progress-bar { background: rgba(255,255,255,0.1); height:8px; border-radius:10px; margin-bottom:30px; overflow:hidden; }
+    .progress-fill { background: linear-gradient(90deg,#ffd700,#ff8c00); height:100%; transition: width .5s ease; border-radius:10px; width:0%; }
+    .question-card { background: rgba(255,255,255,0.95); border-radius:20px; padding:40px; margin-bottom:30px; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
+    .question-number { color:#ff8c00; font-size:16px; font-weight:bold; margin-bottom:15px; text-transform:uppercase; letter-spacing:1px; }
+    .question-text { color:#1a0a2e; font-size:24px; font-weight:bold; margin-bottom:30px; line-height:1.4; }
+    .answers-container { display:flex; flex-direction:column; gap:15px; }
+    .answer-btn { background:#f5f5f5; border:3px solid transparent; padding:20px 25px; font-size:18px; border-radius:15px; cursor:pointer; text-align:left; transition:all .3s ease; color:#1a0a2e; font-weight:500; }
+    .answer-btn:hover:not(:disabled) { background:#e8e8e8; border-color:#ffd700; transform:translateX(5px); }
+    .answer-btn.correct { background:#4caf50; color:white; border-color:#2e7d32; }
+    .answer-btn.incorrect { background:#f44336; color:white; border-color:#c62828; }
+    .answer-btn:disabled { cursor:not-allowed; opacity:0.9; }
+    .feedback-box { background: linear-gradient(135deg,#ffd700,#ff8c00); border-radius:15px; padding:25px; margin-top:25px; color:#1a0a2e; font-size:16px; line-height:1.6; display:none; animation:slideIn .4s ease; }
+    .feedback-box.show { display:block; }
+    @keyframes slideIn { from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+    .score-display { background: rgba(255,255,255,0.1); color:#ffd700; padding:15px 30px; border-radius:50px; font-size:20px; font-weight:bold; text-align:center; margin-bottom:30px; border:2px solid #ffd700; }
+    .result-screen { text-align:center; padding:40px 20px; }
+    .result-title { color:#ffd700; font-size:42px; font-weight:bold; margin-bottom:30px; text-transform:uppercase; }
+    .final-score { background: linear-gradient(135deg,#ffd700,#ff8c00); color:#1a0a2e; font-size:72px; font-weight:bold; padding:40px; border-radius:20px; margin:30px auto; max-width:400px; box-shadow:0 10px 40px rgba(255,215,0,0.4); }
+    .result-message { color:#ffffff; font-size:24px; margin:30px 0; line-height:1.6; max-width:600px; margin-left:auto; margin-right:auto; }
+    .result-emoji { font-size:64px; margin:20px 0; }
+    .button-group { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:40px; }
+    .next-btn { background: linear-gradient(135deg,#4caf50,#2e7d32); margin-top:20px; color:#fff; border:none; padding:12px 28px; border-radius:12px; cursor:pointer; font-weight:bold; }
+    .theme-screen { text-align:center; padding:60px 20px; color:#fff; }
+    .theme-title { font-size:32px; font-weight:bold; color:#ffd700; margin-bottom:20px; }
+    .theme-desc { font-size:18px; margin-bottom:30px; max-width:700px; margin-left:auto; margin-right:auto; color:#fff; opacity:0.95; }
+    .loading-indicator { display:none; color:#ffd700; font-size:16px; margin-top:10px; }
+    .loading-indicator.show { display:block; }
+    @media (max-width:768px) {
+      .game-logo { font-size:32px; }
+      .game-subtitle { font-size:18px; }
+      .question-card { padding:25px; }
+      .question-text { font-size:20px; }
+      .answer-btn { font-size:16px; padding:15px 20px; }
+      .final-score { font-size:56px; padding:30px; }
+      .result-title { font-size:32px; }
+      .result-message { font-size:20px; }
+    }
+  </style>
   <style>@view-transition { navigation: auto; }</style>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
- </head>
- <body>
+</head>
+<body>
   <div class="game-container">
-   <div class="pattern-overlay"></div>
-   <div class="content-wrapper"><!-- Start Screen -->
-    <div id="startScreen" class="screen active start-screen">
-     <div class="game-logo" id="gameTitle">
-      DESMISTIFICANDO E CONSCIENTIZANDO!
-     </div>
-     <div class="game-subtitle" id="gameSubtitle">
-      UM QUIZ DESMISTIFICANDO MITOS E MOSTRANDO OS IMPACTOS DE PESSOAS NEGRAS NA TECNOLOGIA!
-     </div>
-     <div class="decorative-element">
-      <svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#ffd700" stroke-width="2" /> <circle cx="50" cy="50" r="35" fill="none" stroke="#ff8c00" stroke-width="2" /> <circle cx="50" cy="50" r="25" fill="none" stroke="#ffd700" stroke-width="2" /> <path d="M50 10 L50 90 M10 50 L90 50" stroke="#ff8c00" stroke-width="2" /> <path d="M20 20 L80 80 M80 20 L20 80" stroke="#ffd700" stroke-width="2" />
-      </svg>
-     </div><button class="btn" id="startBtn" onclick="startGame()">Começar Jogo</button>
-    </div><!-- Quiz Screen -->
-    <div id="quizScreen" class="screen quiz-screen">
-     <div class="score-display" id="scoreDisplay">
-      Pontuação: 0
-     </div>
-     <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
-     </div>
-     <div class="question-card">
-      <div class="question-number" id="questionNumber"></div>
-      <div class="question-text" id="questionText"></div>
-      <div class="answers-container" id="answersContainer"></div>
-      <div class="feedback-box" id="feedbackBox">
-       <div class="feedback-icon" id="feedbackIcon"></div>
-       <div id="feedbackText"></div>
-      </div><button class="btn next-btn" id="nextBtn" onclick="nextQuestion()" style="display: none;">Próxima Pergunta</button>
-     </div>
-    </div><!-- Result Screen -->
-    <div id="resultScreen" class="screen result-screen">
-     <div class="result-title" id="resultTitle">
-      Resultado Final
-     </div>
-     <div class="result-emoji" id="resultEmoji"></div>
-     <div class="final-score" id="finalScore"></div>
-     <div class="result-message" id="resultMessage"></div>
-     <div class="button-group"><button class="btn" id="playAgainBtn" onclick="resetGame()">Jogar Novamente</button>
-     </div>
-     <div class="loading-indicator" id="loadingIndicator">
-      Salvando resultado...
-     </div>
+    <div class="pattern-overlay"></div>
+    <div class="content-wrapper">
+      <!-- Start Screen -->
+      <div id="startScreen" class="screen active start-screen">
+        <div class="game-logo" id="gameTitle">DESMISTIFICANDO E CONSCIENTIZANDO!</div>
+        <div class="game-subtitle" id="gameSubtitle">UM QUIZ SOBRE CONTRIBUIÇÕES, BARRERAS E SOLUÇÕES NA TECNOLOGIA</div>
+        <div class="decorative-element">
+          <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#ffd700" stroke-width="2" /> <circle cx="50" cy="50" r="35" fill="none" stroke="#ff8c00" stroke-width="2" /> <circle cx="50" cy="50" r="25" fill="none" stroke="#ffd700" stroke-width="2" /> <path d="M50 10 L50 90 M10 50 L90 50" stroke="#ff8c00" stroke-width="2" /> <path d="M20 20 L80 80 M80 20 L20 80" stroke="#ffd700" stroke-width="2" /></svg>
+        </div>
+        <button class="btn" id="startBtn" onclick="startGame()">Começar Jogo</button>
+      </div>
+
+      <!-- Theme Intro Screen (reused for each theme) -->
+      <div id="themeIntroScreen" class="screen theme-screen">
+        <div class="theme-title" id="themeTitle">TEMA</div>
+        <div class="theme-desc" id="themeDesc">Descrição</div>
+        <button class="btn" id="continueThemeBtn" onclick="continueToTheme()">Continuar</button>
+      </div>
+
+      <!-- Quiz Screen -->
+      <div id="quizScreen" class="screen quiz-screen">
+        <div class="score-display" id="scoreDisplay">Pontuação: 0</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="question-card">
+          <div class="question-number" id="questionNumber"></div>
+          <div class="question-text" id="questionText"></div>
+          <div class="answers-container" id="answersContainer"></div>
+          <div class="feedback-box" id="feedbackBox">
+            <div class="feedback-icon" id="feedbackIcon"></div>
+            <div id="feedbackText"></div>
+          </div>
+          <button class="btn next-btn" id="nextBtn" onclick="nextQuestion()" style="display:none;">Próxima Pergunta</button>
+        </div>
+      </div>
+
+      <!-- Result Screen -->
+      <div id="resultScreen" class="screen result-screen">
+        <div class="result-title" id="resultTitle">Resultado Final</div>
+        <div class="result-emoji" id="resultEmoji"></div>
+        <div class="final-score" id="finalScore"></div>
+        <div class="result-message" id="resultMessage"></div>
+        <div class="button-group">
+          <button class="btn" id="playAgainBtn" onclick="resetGame()">Jogar Novamente</button>
+        </div>
+        <div class="loading-indicator" id="loadingIndicator">Salvando resultado...</div>
+      </div>
     </div>
-   </div>
   </div>
+
   <script>
-        const defaultConfig = {
+    // Novas perguntas agrupadas por temas (15 questões)
+    const themes = [
+      {
+        title: "TEMA I: Contribuições e História",
+        desc: "Histórias e invenções de pessoas negras que moldaram tecnologias essenciais.",
+        questions: [
+          {
+            question: "Qual tecnologia essencial de navegação moderna só foi possível graças aos cálculos e modelagem da matemática negra Dra. Gladys West?",
+            answers: [
+              { text: "A invenção da fibra ótica.", correct: false },
+              { text: "A bateria de íon de lítio.", correct: false },
+              { text: "O Sistema de Posicionamento Global (GPS).", correct: true }
+            ],
+            feedback: "A Dra. Gladys West é uma das ''Mulheres Ocultas'' que trabalhou no Centro de Guerra de Superfície Naval dos EUA. Seu trabalho crucial envolveu a programação de computadores para calcular o formato exato da Terra (o geóide), que é o alicerce matemático necessário para que o GPS funcione com precisão."
+ 
+          },
+          {
+            question: "Qual tecnologia moderna de telecomunicações foi desenvolvida e aprimorada pela engenheira negra Dra. Marian Croak, que detém mais de 200 patentes e trabalhou na AT&T e no Google?",
+            answers: [
+              { text: "VoIP (Voice over Internet Protocol), base da telefonia via internet (como Skype e WhatsApp).", correct: true },
+              { text: "O primeiro protocolo de rede Wi-Fi.", correct: false },
+              { text: "A primeira linguagem de programação orientada a objetos (OOP).", correct: false }
+            ],
+            feedback: "A Dra. Marian Croak é uma inventora prolífica. Ela foi fundamental no desenvolvimento do VoIP (Voz sobre Protocolo de Internet) e também é responsável pela tecnologia que permite aos usuários fazer doações por mensagem de texto após desastres. Sua contribuição mudou a forma como nos comunicamos digitalmente."
+          },
+          {
+            question: "Qual engenheiro negro da IBM foi crucial para o desenvolvimento do computador pessoal (PC) moderno, detendo patentes-chave na arquitetura de barramento do sistema (ISA)?",
+            answers: [
+              { text: "George Washington Carver.", correct: false },
+              { text: "Mark Dean.", correct: true },
+              { text: "Philip Emeagwali.", correct: false }
+            ],
+            feedback: "Mark Dean foi o arquiteto-chefe que liderou o time de design do IBM PC. Ele coinventou a arquitetura de barramento ISA, que permitiu a conexão de periféricos como impressoras e teclados, tornando o computador pessoal o que conhecemos hoje."
+          },
+          {
+            question: "Qual pioneira negra na NASA (cientista sênior) inventou um simulador de ilusão óptica que levou ao desenvolvimento de telas 3D para exames médicos e televisão?",
+            answers: [
+              { text: "Mae Jemison.", correct: false },
+              { text: "Annie Easley.", correct: false },
+              { text: "Valerie Thomas.", correct: true }
+            ],
+            feedback: "Em 1980, Valerie Thomas inventou o Transmissor de Ilusão, que utiliza espelhos côncavos para criar imagens virtuais que parecem tridimensionais, estando flutuando em frente à tela. Essa tecnologia é usada hoje em exames de ressonância magnética (MRI) e no desenvolvimento de telas 3D."
+          },
+          {
+            question: "Qual inventor é conhecido como o \"pai do cartucho de videogame removível\" e liderou o design do console Fairchild Channel F, revolucionando a indústria de jogos eletrônicos?",
+            answers: [
+              { text: "Nolan Bushnell.", correct: false },
+              { text: "Jerry Lawson.", correct: true },
+              { text: "Ralph Baer.", correct: false }
+            ],
+            feedback: "Jerry Lawson liderou a equipe que criou o Fairchild Channel F, o primeiro sistema de videogame doméstico a utilizar cartuchos de jogos removíveis (ROMs). Antes dele, os consoles vinham com jogos embutidos. Sua invenção é a base para todos os consoles de jogos modernos."
+          }
+        ]
+      },
+      {
+        title: "TEMA II: Oportunidade e Barreira (Mito do Mérito Neutro)",
+        desc: "Entenda as barreiras estruturais que impedem a plena ascensão de profissionais negros na tecnologia.",
+        questions: [
+          {
+            question: "Se há demanda por talentos em TI, por que profissionais negros ainda reportam grande dificuldade em conseguir vagas sênior e de liderança no setor?",
+            answers: [
+              { text: "Porque a maioria dos profissionais negros prefere trabalhar apenas em startups pequenas.", correct: false },
+              { text: "Devido ao racismo estrutural e ao viés inconsciente, que dificultam a ascensão profissional e a permanência em ambientes hostis (microagressões).", correct: true },
+              { text: "Porque o mercado brasileiro de TI está saturado de mão de obra altamente qualificada.", correct: false }
+            ],
+            feedback: "A dificuldade não é por falta de qualificação, mas sim por barreiras sistêmicas. O racismo estrutural e os vieses inconscientes em processos seletivos e avaliações de desempenho tendem a favorecer candidatos do grupo dominante, minando a ascensão e a retenção de talentos negros em posições de alto escalão."
+          },
+          {
+            question: "Qual é a principal dificuldade que startups brasileiras lideradas por empreendedores negros enfrentam, de acordo com pesquisas como Sebrae/FGV?",
+            answers: [
+              { text: "Maior dificuldade em obter acesso a crédito e financiamento (taxas de negação mais altas que para empreendedores brancos).", correct: true },
+              { text: "Falta de inovação nas ideias de negócio apresentadas.", correct: false },
+              { text: "Ausência de mercado consumidor para seus produtos e serviços.", correct: false }
+            ],
+            feedback: "Estudos têm demonstrado que o viés no mercado financeiro afeta diretamente o crescimento de negócios liderados por pessoas negras. Mesmo com planos de negócios sólidos, esses empreendedores enfrentam taxas mais altas de negação de empréstimos e menos acesso a capital de risco (venture capital), o que limita sua escala."
+          },
+          {
+            question: "Qual é a razão pela qual o conceito de \"mérito\" na contratação de TI é muitas vezes injusto para candidatos negros?",
+            answers: [
+              { text: "A maioria dos profissionais negros não investe em certificações internacionais caras.", correct: false },
+              { text: "O \"mérito\" ignora o ponto de partida desigual, como a diferença de acesso a universidades de ponta, networking e mentoria.", correct: true },
+              { text: "As empresas de TI não dão valor a currículos com experiência em projetos sociais.", correct: false }
+            ],
+            feedback: "O Mito do Mérito Neutro falha ao desconsiderar as desigualdades estruturais. Candidatos de grupos minorizados muitas vezes têm menos acesso a educação de qualidade, networking profissional influente e recursos para cursos caros, o que faz com que o ponto de partida na corrida do ''mérito'' seja desigual."
+          }
+        ]
+      },
+      {
+        title: "TEMA III: Inovação e Racismo Algorítmico (Mito da Tecnologia Cega)",
+        desc: "Como algoritmos refletem dados históricos e por que tecnologia 'neutra' pode perpetuar discriminação.",
+        questions: [
+          {
+            question: "Quando um sistema de Inteligência Artificial para aprovação de crédito nega empréstimos a uma pessoa negra com bom histórico, qual é a origem mais provável desse viés?",
+            answers: [
+              { text: "Um erro aleatório na codificação da linguagem Python ou Java.", correct: false },
+              { text: "O algoritmo foi treinado com dados históricos de crédito que já refletiam a discriminação bancária do passado.", correct: true },
+              { text: "Uma falha na conexão de rede durante a análise do pedido.", correct: false }
+            ],
+            feedback: "Algoritmos de IA não são neutros; eles aprendem com os dados que lhes são fornecidos. Se os dados históricos de crédito mostram que a população negra foi consistentemente discriminada no passado (com mais negações), o algoritmo reproduzirá e até amplificará esse padrão, resultando em racismo algorítmico."
+          },
+          {
+            question: "Qual é o benefício mais direto da diversidade racial em equipes de desenvolvimento de produtos e IA?",
+            answers: [
+              { text: "A redução do custo de marketing e publicidade para a empresa.", correct: false },
+              { text: "A aceleração na velocidade de deploy de novos códigos.", correct: false },
+              { text: "A criação de produtos mais inclusivos, éticos e inovadores, capazes de funcionar para todos os grupos de usuários sem viés (mitigação do racismo algorítmico).", correct: true }
+            ],
+            feedback: "Equipes diversas trazem perspectivas variadas que ajudam a identificar e corrigir vieses nos dados e nos modelos. A presença de profissionais negros, por exemplo, garante que problemas como o racismo algorítmico no reconhecimento facial ou na aprovação de crédito sejam notados e mitigados, levando a produtos mais justos e eficazes para todos os usuários."
+          },
+          {
+            question: "O que significa quando um modelo de IA de reconhecimento de imagem rotula pessoas negras de forma pejorativa (exemplo do Google Photos no passado)?",
+            answers: [
+              { text: "Significa que o modelo de IA atingiu um nível de inteligência autônoma maligna.", correct: false },
+              { text: "O modelo de IA está refletindo e perpetuando o racismo da sociedade porque foi treinado com dados e tags tendenciosos e insuficientes.", correct: true },
+              { text: "Significa que o problema está na conexão de internet do usuário que enviou a foto.", correct: false }
+            ],
+            feedback: "O problema está no conjunto de dados de treinamento. Se os dados usados para ensinar o algoritmo a reconhecer imagens contêm poucas fotos de pessoas negras ou se essas fotos estão associadas a tags incorretas ou ofensivas, o modelo irá generalizar e reproduzir esse viés, perpetuando o racismo da sociedade na tecnologia."
+          }
+        ]
+      },
+      {
+        title: "TEMA IV: Solução e Visão (Mito da Solução Simples)",
+        desc: "Medidas reais e estruturais para promover acesso, permanência e ascensão de profissionais negros em TI.",
+        questions: [
+          {
+            question: "Para que um programa de diversidade em TI seja realmente bem-sucedido, o que deve acompanhar a contratação de profissionais negros?",
+            answers: [
+              { text: "Uma proibição total de falar sobre raça e etnia no local de trabalho.", correct: false },
+              { text: "Estratégias de permanência (cultura antirracista, mentoring) e ascensão (promoção a cargos de liderança).", correct: true },
+              { text: "Apenas um aumento nos salários da base, sem alterar a cultura.", correct: false }
+            ],
+            feedback: "A mera contratação não basta. É fundamental garantir que a cultura da empresa seja antirracista e que existam mecanismos claros de ascensão profissional. Sem isso, profissionais negros tendem a enfrentar ambientes hostis, o que leva ao alto turnover, saída da empresa."
+          },
+          {
+            question: "Qual é o principal problema da mentalidade de que profissionais negros em TI \"só se interessam por projetos sociais\"?",
+            answers: [
+              { text: "É uma verdade, pois as áreas sociais pagam melhor do que as áreas técnicas.", correct: false },
+              { text: "É um problema apenas na Europa, não no Brasil.", correct: false },
+              { text: "É um estereótipo que limita o potencial, ignorando que talentos negros atuam em todas as áreas, como Cibersegurança, IA e Fintech.", correct: true }
+            ],
+            feedback: "Esse é um estereótipo limitante que confina talentos negros a um nicho específico. Profissionais negros são desenvolvedores, arquitetos de software, especialistas em Cibersegurança e data science, e não devem ter sua atuação e ambição restritas por vieses."
+          },
+          {
+            question: "Qual é o impacto financeiro da diversidade racial na liderança de empresas de TI, segundo estudos de consultorias globais?",
+            answers: [
+              { text: "A diversidade não tem impacto mensurável no resultado financeiro.", correct: false },
+              { text: "Aumenta o custo operacional devido à maior necessidade de treinamento cultural.", correct: false },
+              { text: "Empresas com diversidade racial e étnica na liderança têm maior probabilidade de obter resultados financeiros superiores à média do mercado.", correct: true }
+            ],
+            feedback: "Pesquisas de consultorias como McKinsey e Boston Consulting Group (BCG) mostram uma correlação positiva entre diversidade racial na liderança e desempenho financeiro superior. Isso ocorre porque a diversidade impulsiona a inovação, melhora a tomada de decisões e permite uma melhor compreensão de um mercado consumidor globalizado."
+          },
+          {
+            question: "O que significa a afirmação de que a inclusão em TI precisa focar na \"ascensão\" de profissionais negros?",
+            answers: [
+              { text: "Que a empresa deve contratar apenas profissionais seniores e ignorar a base.", correct: false },
+              { text: "Garantir que profissionais negros sejam promovidos e alcancem cargos C-Level (liderança executiva) e de alta gerência, onde as decisões estratégicas são tomadas.", correct: true },
+              { text: "Que a empresa deve criar cargos de liderança exclusivos para negros, sem responsabilidades estratégicas.", correct: false }
+            ],
+            feedback: "Focar na ascensão significa ir além da contratação inicial (acesso) e garantir que a empresa tenha um pipeline de talentos que leve profissionais negros a ocupar posições de poder e influência (C-Level, diretoria). É nesse nível que eles podem impactar a cultura da empresa e as estratégias de negócios de forma significativa."
+          }
+        ]
+      }
+    ];
+
+    // estado do jogo
+    let themeIndex = 0;
+    let questionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    // SDK handlers (mantidos do seu original)
+    const dataHandler = {
+      onDataChanged(data) {
+        // modo write-only
+      }
+    };
+
+    async function initializeApp() {
+      if (window.dataSdk && window.dataSdk.init) {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          console.error("Failed to initialize data SDK");
+        }
+      }
+      // elementSdk para configurações editáveis (mantive como no seu original)
+      if (window.elementSdk && window.elementSdk.init) {
+        await window.elementSdk.init({
+          defaultConfig: {
             game_title: "TECNOLOGIA É DE TODES",
             game_subtitle: "DESMISTIFICANDO MITOS",
             start_button: "Começar Jogo",
             result_title: "Resultado Final",
             play_again_button: "Jogar Novamente"
-        };
+          },
+          onConfigChange: async (config) => {
+            document.getElementById('gameTitle').textContent = config.game_title || "TECNOLOGIA É DE TODES";
+            document.getElementById('gameSubtitle').textContent = config.game_subtitle || "DESMISTIFICANDO MITOS";
+            document.getElementById('startBtn').textContent = config.start_button || "Começar Jogo";
+            document.getElementById('resultTitle').textContent = config.result_title || "Resultado Final";
+            document.getElementById('playAgainBtn').textContent = config.play_again_button || "Jogar Novamente";
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              { get: () => config.background_color || "#1a0a2e", set: (v) => { config.background_color = v; window.elementSdk && window.elementSdk.setConfig({ background_color: v }); } },
+              { get: () => config.accent_color || "#ffd700", set: (v) => { config.accent_color = v; window.elementSdk && window.elementSdk.setConfig({ accent_color: v }); } },
+              { get: () => config.text_color || "#ffffff", set: (v) => { config.text_color = v; window.elementSdk && window.elementSdk.setConfig({ text_color: v }); } }
+            ],
+            borderables: [], fontEditable: undefined, fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["game_title", config.game_title || "TECNOLOGIA É DE TODES"],
+            ["game_subtitle", config.game_subtitle || "DESMISTIFICANDO MITOS"],
+            ["start_button", config.start_button || "Começar Jogo"],
+            ["result_title", config.result_title || "Resultado Final"],
+            ["play_again_button", config.play_again_button || "Jogar Novamente"]
+          ])
+        });
+      }
+    }
 
-        const questions = [
-            {
-                question: "Verdadeiro ou falso: a tecnologia digital é uma invenção exclusivamente europeia.",
-                answers: [
-                    { text: "Verdadeiro", correct: false },
-                    { text: "Falso", correct: true },
-                    { text: "Parcialmente verdadeiro", correct: false }
-                ],
-                feedback: "Correto! Diversos cientistas negros e indígenas contribuíram para o avanço tecnológico global. A tecnologia é resultado de contribuições de todas as culturas e povos."
-            },
-            {
-                question: "Qual dessas invenções teve participação direta de uma mulher negra?",
-                answers: [
-                    { text: "Bluetooth", correct: false },
-                    { text: "GPS", correct: true },
-                    { text: "Impressora 3D", correct: false }
-                ],
-                feedback: "Exato! A matemática Gladys West ajudou a criar o sistema de posicionamento global (GPS). Seu trabalho foi fundamental para o desenvolvimento dessa tecnologia que usamos diariamente."
-            },
-            {
-                question: "Os povos indígenas brasileiros desenvolveram tecnologias voltadas principalmente para:",
-                answers: [
-                    { text: "Armas e guerra", correct: false },
-                    { text: "Manejo sustentável e comunicação oral", correct: true },
-                    { text: "Computadores primitivos", correct: false }
-                ],
-                feedback: "Certo! Povos indígenas criaram sistemas avançados de manejo do solo, agricultura sustentável e redes de comunicação social complexas que inspiram soluções modernas."
-            },
-            {
-                question: "Quem foi Mark Dean?",
-                answers: [
-                    { text: "Criador do sistema Android", correct: false },
-                    { text: "Engenheiro negro co-inventor do PC IBM", correct: true },
-                    { text: "Arquiteto de software indígena", correct: false }
-                ],
-                feedback: "Boa! Mark Dean foi um dos inventores do primeiro computador pessoal da IBM e possui mais de 20 patentes. Ele é um dos pioneiros da computação moderna."
-            },
-            {
-                question: "O que significa o termo 'tecnologia ancestral indígena'?",
-                answers: [
-                    { text: "Ferramentas antigas sem valor", correct: false },
-                    { text: "Saberes tradicionais que inspiram inovações sustentáveis", correct: true },
-                    { text: "Mitos e rituais sem base prática", correct: false }
-                ],
-                feedback: "Correto! As tecnologias ancestrais indígenas inspiram soluções modernas em ecologia, sustentabilidade, medicina e gestão de recursos naturais."
-            },
-            {
-                question: "Quem foi Katherine Johnson?",
-                answers: [
-                    { text: "Matemática negra da NASA que calculou trajetórias espaciais", correct: true },
-                    { text: "Inventora do telefone celular", correct: false },
-                    { text: "Criadora das redes sociais", correct: false }
-                ],
-                feedback: "Perfeito! Katherine Johnson foi uma matemática brilhante cujos cálculos foram essenciais para o sucesso das missões espaciais da NASA, incluindo a chegada do homem à Lua."
-            },
-            {
-                question: "A Terra Preta de Índio é um exemplo de:",
-                answers: [
-                    { text: "Poluição antiga", correct: false },
-                    { text: "Tecnologia agrícola indígena avançada", correct: true },
-                    { text: "Fenômeno natural sem intervenção humana", correct: false }
-                ],
-                feedback: "Excelente! A Terra Preta de Índio é um solo super fértil criado por povos indígenas da Amazônia há milhares de anos, demonstrando conhecimento avançado em agricultura sustentável."
-            },
-            {
-                question: "Quem foi Otis Boykin?",
-                answers: [
-                    { text: "Inventor negro do marca-passo cardíaco", correct: true },
-                    { text: "Criador do primeiro smartphone", correct: false },
-                    { text: "Desenvolvedor de jogos eletrônicos", correct: false }
-                ],
-                feedback: "Correto! Otis Boykin foi um inventor afro-americano que criou componentes essenciais para o marca-passo cardíaco, salvando milhões de vidas."
-            },
-            {
-                question: "Os sistemas de comunicação indígenas incluíam:",
-                answers: [
-                    { text: "Apenas sinais de fumaça", correct: false },
-                    { text: "Redes complexas de mensageiros e sinais visuais", correct: true },
-                    { text: "Nenhum sistema organizado", correct: false }
-                ],
-                feedback: "Isso mesmo! Povos indígenas desenvolveram sistemas sofisticados de comunicação que incluíam mensageiros, sinais visuais, sonoros e até sistemas de contabilidade."
-            },
-            {
-                question: "O que é afrofuturismo?",
-                answers: [
-                    { text: "Um movimento que imagina futuros tecnológicos com protagonismo negro", correct: true },
-                    { text: "Uma tecnologia exclusiva da África", correct: false },
-                    { text: "Um estilo de música eletrônica", correct: false }
-                ],
-                feedback: "Perfeito! O afrofuturismo é um movimento cultural que reimagina o futuro e a tecnologia com protagonismo e perspectivas negras, combatendo a exclusão histórica."
-            }
-        ];
+    // helpers de UI
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
 
-        let currentQuestion = 0;
-        let score = 0;
-        let answered = false;
+    function startGame() {
+      themeIndex = 0;
+      questionIndex = 0;
+      score = 0;
+      answered = false;
+      document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
+      // mostrar a tela do primeiro tema (intro)
+      showThemeIntro(themeIndex);
+    }
 
-        const dataHandler = {
-            onDataChanged(data) {
-                // Write-only mode - no need to display data
-            }
-        };
+    function showThemeIntro(idx) {
+      const theme = themes[idx];
+      document.getElementById('themeTitle').textContent = theme.title;
+      document.getElementById('themeDesc').textContent = theme.desc || '';
+      showScreen('themeIntroScreen');
+      // ocultar botão continuar caso queira (mas deixei visível)
+    }
 
-        async function initializeApp() {
-            const initResult = await window.dataSdk.init(dataHandler);
-            if (!initResult.isOk) {
-                console.error("Failed to initialize data SDK");
-            }
+    function continueToTheme() {
+      // vai para as perguntas do themeIndex
+      questionIndex = 0;
+      answered = false;
+      document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
+      loadQuestion();
+      showScreen('quizScreen');
+    }
 
-            await window.elementSdk.init({
-                defaultConfig,
-                onConfigChange: async (config) => {
-                    document.getElementById('gameTitle').textContent = config.game_title || defaultConfig.game_title;
-                    document.getElementById('gameSubtitle').textContent = config.game_subtitle || defaultConfig.game_subtitle;
-                    document.getElementById('startBtn').textContent = config.start_button || defaultConfig.start_button;
-                    document.getElementById('resultTitle').textContent = config.result_title || defaultConfig.result_title;
-                    document.getElementById('playAgainBtn').textContent = config.play_again_button || defaultConfig.play_again_button;
-                },
-                mapToCapabilities: (config) => ({
-                    recolorables: [
-                        {
-                            get: () => config.background_color || "#1a0a2e",
-                            set: (value) => {
-                                config.background_color = value;
-                                if (window.elementSdk) {
-                                    window.elementSdk.setConfig({ background_color: value });
-                                }
-                            }
-                        },
-                        {
-                            get: () => config.accent_color || "#ffd700",
-                            set: (value) => {
-                                config.accent_color = value;
-                                if (window.elementSdk) {
-                                    window.elementSdk.setConfig({ accent_color: value });
-                                }
-                            }
-                        },
-                        {
-                            get: () => config.text_color || "#ffffff",
-                            set: (value) => {
-                                config.text_color = value;
-                                if (window.elementSdk) {
-                                    window.elementSdk.setConfig({ text_color: value });
-                                }
-                            }
-                        }
-                    ],
-                    borderables: [],
-                    fontEditable: undefined,
-                    fontSizeable: undefined
-                }),
-                mapToEditPanelValues: (config) => new Map([
-                    ["game_title", config.game_title || defaultConfig.game_title],
-                    ["game_subtitle", config.game_subtitle || defaultConfig.game_subtitle],
-                    ["start_button", config.start_button || defaultConfig.start_button],
-                    ["result_title", config.result_title || defaultConfig.result_title],
-                    ["play_again_button", config.play_again_button || defaultConfig.play_again_button]
-                ])
-            });
+    function loadQuestion() {
+      answered = false;
+      const theme = themes[themeIndex];
+      const q = theme.questions[questionIndex];
+
+      document.getElementById('questionNumber').textContent = `Pergunta ${questionIndex + 1} de ${theme.questions.length} — ${theme.title}`;
+      document.getElementById('questionText').textContent = q.question;
+      document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
+
+      // progress: mostrar progresso dentro do tema (optei por isso)
+      const progress = ((questionIndex) / theme.questions.length) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+
+      const container = document.getElementById('answersContainer');
+      container.innerHTML = '';
+      q.answers.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = ans.text;
+        btn.onclick = () => selectAnswer(i);
+        container.appendChild(btn);
+      });
+
+      document.getElementById('feedbackBox').classList.remove('show');
+      document.getElementById('nextBtn').style.display = 'none';
+    }
+
+    function selectAnswer(answerIndex) {
+      if (answered) return;
+      answered = true;
+
+      const theme = themes[themeIndex];
+      const q = theme.questions[questionIndex];
+      const buttons = document.querySelectorAll('.answer-btn');
+      const selected = q.answers[answerIndex];
+
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (q.answers[i].correct) {
+          b.classList.add('correct');
+        } else if (i === answerIndex && !selected.correct) {
+          b.classList.add('incorrect');
         }
+      });
 
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
+      if (selected.correct) {
+        score += 10;
+        document.getElementById('feedbackIcon').textContent = '✨';
+      } else {
+        document.getElementById('feedbackIcon').textContent = '💡';
+      }
+
+      document.getElementById('feedbackText').textContent = q.feedback;
+      document.getElementById('feedbackBox').classList.add('show');
+      document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
+      document.getElementById('nextBtn').style.display = 'block';
+    }
+
+    function nextQuestion() {
+      const theme = themes[themeIndex];
+
+      questionIndex++;
+      if (questionIndex < theme.questions.length) {
+        loadQuestion();
+      } else {
+        // fim do tema atual
+        themeIndex++;
+        if (themeIndex < themes.length) {
+          // mostrar tela de intro do próximo tema
+          showThemeIntro(themeIndex);
+        } else {
+          // todos os temas respondidos -> mostrar resultados
+          showResults();
         }
+      }
+    }
 
-        function startGame() {
-            currentQuestion = 0;
-            score = 0;
-            answered = false;
-            showScreen('quizScreen');
-            loadQuestion();
+    async function showResults() {
+      showScreen('resultScreen');
+
+      const maxScore = themes.reduce((acc, t) => acc + t.questions.length * 10, 0);
+      const percentage = (score / maxScore) * 100;
+      let emoji = '📚';
+      let message = '🌱 Ótimo começo! Há muito a descobrir sobre as contribuições negras na tecnologia. Jogue novamente e continue aprendendo!';
+
+      if (percentage === 100) {
+        emoji = '🏆';
+        message = '✨ Você é um desmistificador nato! Conhecimento perfeito sobre as contribuições negras na tecnologia. Continue aprendendo e valorizando nossas origens!';
+      } else if (percentage >= 70) {
+        emoji = '🌟';
+        message = '👏 Excelente trabalho! Você tem um ótimo conhecimento sobre as contribuições negras na tecnologia. Continue explorando essas histórias inspiradoras!';
+      } else if (percentage >= 50) {
+        emoji = '💪';
+        message = '👍 Bom jogo! Você está no caminho certo. Conhecimento é tecnologia também. Continue aprendendo sobre essas contribuições fundamentais!';
+      }
+
+      document.getElementById('resultEmoji').textContent = emoji;
+      document.getElementById('finalScore').textContent = `${score}/${maxScore}`;
+      document.getElementById('resultMessage').textContent = message;
+
+      // salvar resultado via dataSdk (se disponível)
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      loadingIndicator.classList.add('show');
+
+      if (window.dataSdk && window.dataSdk.create) {
+        try {
+          const createResult = await window.dataSdk.create({
+            player_name: "Jogador",
+            score: score,
+            total_questions: maxScore / 10,
+            completed_at: new Date().toISOString()
+          });
+          if (!createResult.isOk) {
+            console.error("Failed to save result");
+          }
+        } catch (e) {
+          console.error("Erro ao salvar resultado:", e);
         }
+      }
 
-        function loadQuestion() {
-            answered = false;
-            const question = questions[currentQuestion];
-            
-            document.getElementById('questionNumber').textContent = `Pergunta ${currentQuestion + 1} de ${questions.length}`;
-            document.getElementById('questionText').textContent = question.question;
-            document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
-            
-            const progress = ((currentQuestion) / questions.length) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-            
-            const answersContainer = document.getElementById('answersContainer');
-            answersContainer.innerHTML = '';
-            
-            question.answers.forEach((answer, index) => {
-                const button = document.createElement('button');
-                button.className = 'answer-btn';
-                button.textContent = answer.text;
-                button.onclick = () => selectAnswer(index);
-                answersContainer.appendChild(button);
-            });
-            
-            document.getElementById('feedbackBox').classList.remove('show');
-            document.getElementById('nextBtn').style.display = 'none';
-        }
+      loadingIndicator.classList.remove('show');
+    }
 
-        function selectAnswer(answerIndex) {
-            if (answered) return;
-            
-            answered = true;
-            const question = questions[currentQuestion];
-            const buttons = document.querySelectorAll('.answer-btn');
-            const selectedAnswer = question.answers[answerIndex];
-            
-            buttons.forEach((button, index) => {
-                button.disabled = true;
-                if (question.answers[index].correct) {
-                    button.classList.add('correct');
-                } else if (index === answerIndex && !selectedAnswer.correct) {
-                    button.classList.add('incorrect');
-                }
-            });
-            
-            if (selectedAnswer.correct) {
-                score += 10;
-                document.getElementById('feedbackIcon').textContent = '✨';
-                document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
-            } else {
-                document.getElementById('feedbackIcon').textContent = '💡';
-            }
-            
-            document.getElementById('feedbackText').textContent = question.feedback;
-            document.getElementById('feedbackBox').classList.add('show');
-            document.getElementById('nextBtn').style.display = 'block';
-        }
+    function resetGame() {
+      themeIndex = 0;
+      questionIndex = 0;
+      score = 0;
+      answered = false;
+      document.getElementById('progressFill').style.width = '0%';
+      document.getElementById('scoreDisplay').textContent = `Pontuação: ${score}`;
+      showScreen('startScreen');
+    }
 
-        function nextQuestion() {
-            currentQuestion++;
-            
-            if (currentQuestion < questions.length) {
-                loadQuestion();
-            } else {
-                showResults();
-            }
-        }
+    // inicializa
+    initializeApp();
+    // expose startGame no escopo global (já foi usado inline no HTML)
+    window.startGame = startGame;
+    window.continueToTheme = continueToTheme;
+    window.nextQuestion = nextQuestion;
+    window.resetGame = resetGame;
+  </script>
 
-        async function showResults() {
-            showScreen('resultScreen');
-            
-            const percentage = (score / (questions.length * 10)) * 100;
-            let emoji, message;
-            
-            if (percentage === 100) {
-                emoji = '🏆';
-                message = '✨ Você é um desmistificador nato! Conhecimento perfeito sobre as contribuições negras e indígenas na tecnologia. Continue aprendendo e valorizando nossas origens!';
-            } else if (percentage >= 70) {
-                emoji = '🌟';
-                message = '👏 Excelente trabalho! Você tem um ótimo conhecimento sobre as contribuições negras e indígenas na tecnologia. Continue explorando essas histórias inspiradoras!';
-            } else if (percentage >= 50) {
-                emoji = '💪';
-                message = '👍 Bom jogo! Você está no caminho certo. Conhecimento é tecnologia também. Continue aprendendo sobre essas contribuições fundamentais!';
-            } else {
-                emoji = '📚';
-                message = '🌱 Ótimo começo! Há muito a descobrir sobre as contribuições negras e indígenas na tecnologia. Jogue novamente e continue aprendendo!';
-            }
-            
-            document.getElementById('resultEmoji').textContent = emoji;
-            document.getElementById('finalScore').textContent = `${score}/${questions.length * 10}`;
-            document.getElementById('resultMessage').textContent = message;
-            
-            const loadingIndicator = document.getElementById('loadingIndicator');
-            loadingIndicator.classList.add('show');
-            
-            const createResult = await window.dataSdk.create({
-                player_name: "Jogador",
-                score: score,
-                total_questions: questions.length,
-                completed_at: new Date().toISOString()
-            });
-            
-            loadingIndicator.classList.remove('show');
-            
-            if (!createResult.isOk) {
-                console.error("Failed to save result");
-            }
-        }
 
-        function resetGame() {
-            startGame();
-        }
-
-        initializeApp();
-    </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'999823b11203cd6d',t:'MTc2MjMwMTU0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
-
